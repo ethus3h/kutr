@@ -5,12 +5,16 @@
 
 This repository contains a fork of [**Koel**](http://koel.phanan.net) called **Koel on the rocks**.
 This will add many experimental features such as:
+- Storing all the available tags whenever possible like genre and being able to browse via them (thanks to @alex-phillips)
 - The capability to browse your music collection by folders too
 - ~~A smarter tag extraction for invalid files~~ [DONE]
-- A fixed GUI (for example while importing songs with a progress bar)
+- A GUI that does not errors out  (for example while importing songs with a progress bar, or drag and dropping songs, or selecting songs when column ordering is on)
 - ~~The ability to install Koel under a CMS (using your CMS' authentication)~~ [DONE].
-- The ability to logout directly from your CMS
+- ~~The ability to logout directly from your CMS~~ [DONE]
 - Per user library with sharing capabilities
+
+I'm trying to keep the changes to phanan's master branch as a minimum so it'll be possible to merge his modifications easily. However, I don't promise I'm not breaking things, but since I'm eating my own dog food, I should be well aware of bug I've induced.
+Also, I'm submitting my changes to phanan's repository, but he might decides not to merge them. In that case, they'll stay here for you to use if you need them.
 
 ## Install and Upgrade Guide
 
@@ -19,5 +23,12 @@ All the steps here apply to this fork.
 As a side note, you need node 6.x or later (don't use LTS version, it does not work).
 
 If you are upgrading, see [Releases](https://github.com/phanan/koel/releases) for guides corresponding to your version.
+
+## New feature documentation
+
+The `.env.example` contains the new keys required to use the new features. If you already have a `.env` file on your koel installation, just diff them and add the missing keys.
+
+Typically, if you intend to integrate **kotr** in your CMS/web application, you'll have to follow the steps described in `cms_login.php.example` to glue the required calls in **kotr**. This file has to be modified to fit your CMS and stored in your CMS/web application (it must be in the same subdomain as your application so the CMS's session is accessible).
+
 
 
