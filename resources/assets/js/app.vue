@@ -191,9 +191,11 @@ export default {
        */
       logout () {
         userStore.logout().then((r) => {
-          ls.remove('jwt-token')
-          forceReloadWindow()
-        })
+          ls.remove('jwt-token');
+          window.onbeforeunload = function() {};
+          // Because there is no token and ours is removed, this will trigger calling the remote logout URL redirection
+          window.location.replace('/loginRedir.php');
+        });
       },
 
       /**

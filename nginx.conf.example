@@ -9,7 +9,7 @@ server {
   gzip_comp_level  9;
 
   # Whitelist only index.php, robots.txt, and those start with public/ or api/
-  if ($request_uri !~ ^/$|index\.php|robots\.txt|api/|public/) {
+  if ($request_uri !~ ^/$|index\.php|loginRedir\.php|robots\.txt|api/|public/) {
     return 404;
   }
 
