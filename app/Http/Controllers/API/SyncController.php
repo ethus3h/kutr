@@ -17,10 +17,12 @@ class SyncController extends Controller
      */
     public function sync(SyncRequest $request, $force = false)
     {
-        // In a next version we should opt for a echo system,
-        // but let's just do this async now.
-        $results = Media::sync();
+         // In a next version we should opt for a echo system,
+         // but let's just do this async now.
+        $results = Media::syncStep($force, $request->input('doneAlready'));
+        if (count($results) === 0)
+            return response('Not supported on command line', 500);
 
-        return response()->json();
+        return response()->json([ 'lastSong' => $results['lastSong'], 'songsDone' => $results['change'] + $results['nochange'], 'songsFailed' => $results['bad'], 'songsNoChange'=> $results['nochange'], 'songsTotal' => $results['count'] ]);
     }
 }

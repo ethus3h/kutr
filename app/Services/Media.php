@@ -108,6 +108,88 @@ class Media
         event(new LibraryChanged());
     }
 
+
+    /**
+     * Sync the media (step by step).
+     *
+     * @param Number      $doneAlready The number of files to skip before starting synchronizing
+     * @param bool        $force       Whether to force syncing even unchanged files (if set to true, it drops the library)
+     * @param Number      $amount      If not zero, compute as many file as this amount before returning
+     * @return array  The last sync state
+     */
+    public function syncStep($force = false, $doneAlready = 0, $amount = 0)
+    {
+        if (app()->runningInConsole()) {
+            return []; // Should not be called from the console (how can it be called ?)
+        }
+
+        if ($force) {
+            Song::whereNotIn('id', [])->delete();
+            $amount = 1; // Force fast reply for the first request
+        }
+
+        // Disable the PHP builtin time limit (if run from nginx, it's not this limit that's used anyway)
+        set_time_limit(0);
+        $totalTime = config('koel.sync.timeout');
+        $startTime = microtime(true);
+
+        $path = Setting::get('media_path');
+        $this->setTags([]);
+
+        $getID3 = new getID3();
+
+        $files = $this->gatherFiles($path);
+
+        // No need to store the files anymore, only the count
+        $results = [
+            'change' => 0,   // Updated or added files
+            'bad' => [],     // Bad files
+            'nochange' => 0, // Unmodified files
+            'count' => count($files),
+            'lastSong' => 'Starting...',
+        ];
+
+        foreach ($files as $file) {
+            if ($doneAlready) {
+                $results['nochange'] = $results['nochange'] + 1;
+                $doneAlready--;
+                continue;
+            }
+            $file = new File($file, $getID3);
+
+            try {
+                $song = $file->sync($this->tags, false);
+            } catch(Exception $e) {
+                $song = false;
+                $file->setSyncError($e->getMessage());
+            }
+
+            if ($song === true) {
+                $results['nochange'] = $results['nochange'] + 1;
+            } elseif ($song === false) {
+                $results['bad'][] = $file->getPath().' : '. $file->getSyncError();
+            } else {
+                $results['change'] = $results['change'] + 1;
+                $results['lastSong'] = $song->title . ' <em>by</em> ' . $song->getArtistAttribute()->name;
+            }
+            if ($amount !== 0 && $results['change'] > $amount) {
+                break;
+            }
+            // Then check if we've spent half our budget time, and in this case, let's estimate the remaining time
+            $currentTime = microtime(true);
+            if ($amount === 0 && ($currentTime - $startTime) > $totalTime / 2) {
+                $amount = (int)($results['change'] * 1.5);
+            }
+        }
+
+        if ($results['nochange'] + $results['change'] + count($results['bad']) == $results['count']) {
+            // Trigger LibraryChanged, so that TidyLibrary handler is fired to, erm, tidy our library.
+            event(new LibraryChanged());
+        }
+
+        return $results;
+    }
+
     /**
      * Gather all applicable files in a given directory.
      *

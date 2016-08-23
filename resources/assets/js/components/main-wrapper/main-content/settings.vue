@@ -15,12 +15,23 @@
 
         <input type="text" v-model="state.settings.media_path" id="inputSettingsPath">
       </div>
+    
+      <div class="form-row">
+        <label for="inputSettingsPublic">Media Path Sharing</label>
+        <p class="help">
+          If checked, the songs found in the path set above are visible to all users.
+          Otherwise, only you will be able to see these songs.
+        </p>
+
+        <input type="checkbox" v-model="state.settings.media_path_public" id="inputSettingsPublic">
+      </div>
 
       <div class="form-row">
         <button type="submit">Save settings</button>
         <button type="button" @click="scanLibrary">Scan library</button>
       </div>
     </form>
+    <sync-update ref="syncUpdate"></sync-update>
   </section>
 </template>
 
@@ -28,10 +39,13 @@
 import { settingStore, sharedStore } from '../../../stores'
 import { parseValidationError, forceReloadWindow, showOverlay, hideOverlay, alerts } from '../../../utils'
 import { http } from '../../../services';
-import router from '../../../router'
+import router from '../../../router';
+import syncUpdate from '../../../components/modals/sync-update.vue';
 
 export default {
-  data () {
+  components: { syncUpdate },
+
+  data() {
     return {
       state: settingStore.state,
       sharedState: sharedStore.state
@@ -84,30 +98,13 @@ export default {
     },
 
     /**
-     * Scan the media path
+     * Scan the given path
      */
     scanLibrary() {
-      showOverlay()
-
-      new Promise((resolve, reject) => {
-          http.post('syncLibrary', null, data => resolve(data), r => reject(r))
-      }).then(r => {
-          // Make sure we're back to home first.
-          router.go('home')
-          forceReloadWindow()
-      }).catch(r => {
-          let msg = 'Unknown error.'
-
-          if (r.status === 422) {
-            msg = parseValidationError(r.responseJSON)[0]
-          }
-
-          hideOverlay()
-          alerts.error(msg)
-      })
+      this.$refs.syncUpdate.startSync()
     }
   }
-}
+};
 </script>
 
 <style lang="sass">
