@@ -17,7 +17,8 @@
       </div>
 
       <div class="form-row">
-        <button type="submit">Scan</button>
+        <button type="submit">Save settings</button>
+        <button type="button" @click="scanLibrary">Scan library</button>
       </div>
     </form>
   </section>
@@ -26,6 +27,7 @@
 <script>
 import { settingStore, sharedStore } from '../../../stores'
 import { parseValidationError, forceReloadWindow, showOverlay, hideOverlay, alerts } from '../../../utils'
+import { http } from '../../../services';
 import router from '../../../router'
 
 export default {
@@ -78,6 +80,30 @@ export default {
 
         hideOverlay()
         alerts.error(msg)
+      })
+    },
+
+    /**
+     * Scan the media path
+     */
+    scanLibrary() {
+      showOverlay()
+
+      new Promise((resolve, reject) => {
+          http.post('syncLibrary', null, data => resolve(data), r => reject(r))
+      }).then(r => {
+          // Make sure we're back to home first.
+          router.go('home')
+          forceReloadWindow()
+      }).catch(r => {
+          let msg = 'Unknown error.'
+
+          if (r.status === 422) {
+            msg = parseValidationError(r.responseJSON)[0]
+          }
+
+          hideOverlay()
+          alerts.error(msg)
       })
     }
   }
