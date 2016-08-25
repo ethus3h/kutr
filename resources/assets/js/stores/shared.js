@@ -1,8 +1,8 @@
 import { assign } from 'lodash'
 import isMobile from 'ismobilejs'
 
-import { http } from '../services'
-import { userStore, preferenceStore, artistStore, songStore, playlistStore, queueStore, settingStore } from '.'
+import { http } from '../services';
+import { userStore, preferenceStore, artistStore, songStore, playlistStore, queueStore, settingStore, folderStore } from '.';
 
 export const sharedStore = {
   state: {
@@ -75,5 +75,6 @@ export const sharedStore = {
     this.state.currentVersion = ''
     this.state.latestVersion = ''
     this.state.cdnUrl = ''
+    folderStore.reset()
   }
 }

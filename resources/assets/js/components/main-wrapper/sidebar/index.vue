@@ -23,6 +23,9 @@
         <li>
           <a :class="['artists', currentView == 'artists' ? 'active' : '']" href="/#!/artists">Artists</a>
         </li>
+        <li>
+          <a class="folders" :class="[currentView == 'folders' ? 'active' : '']" href="/#!/folders">Folders</a>
+        </li>
         <li v-if="sharedState.useYouTube">
           <a :class="['youtube', currentView == 'youtubePlayer' ? 'active' : '']" href="/#!/youtube">YouTube Video</a>
         </li>
@@ -232,6 +235,10 @@ export default {
 
       &.artists::before {
         content: "\f130";
+      }
+
+      &.folders::before {
+        content: "\f07c";
       }
 
       &.youtube::before {
