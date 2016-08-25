@@ -6,12 +6,12 @@
 This repository contains a fork of [**Koel**](http://koel.phanan.net) called **Koel on the rocks**.
 This will add many experimental features such as:
 - Storing all the available tags whenever possible like genre and being able to browse via them (thanks to @alex-phillips)
-- The capability to browse your music collection by folders too
+- The capability to browse your music collection by folders too [STARTED]
 - ~~A smarter tag extraction for invalid files~~ [DONE]
-- A GUI that does not errors out  (for example while importing songs with a progress bar, or drag and dropping songs, or selecting songs when column ordering is on)
+- A GUI that does not errors out  (~~for example while importing songs with a progress bar, or drag and dropping songs~~, or selecting songs when column ordering is on) [PARTIALLY DONE]
 - ~~The ability to install Koel under a CMS (using your CMS' authentication)~~ [DONE].
 - ~~The ability to logout directly from your CMS~~ [DONE]
-- Per user library with sharing capabilities
+- Per user library with sharing capabilities [STARTED]
 
 I'm trying to keep the changes to phanan's master branch as a minimum so it'll be possible to merge his modifications easily. However, I don't promise I'm not breaking things, but since I'm eating my own dog food, I should be well aware of bug I've induced.
 Also, I'm submitting my changes to phanan's repository, but he might decides not to merge them. In that case, they'll stay here for you to use if you need them.
