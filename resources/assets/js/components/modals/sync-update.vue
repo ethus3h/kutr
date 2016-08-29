@@ -163,7 +163,7 @@
           font-family: Raleway, Helvetica, sans-serif;
           font-size: 22px;
           font-size: 1.7rem;
-          font-size: 5.6vmin;
+          font-size: 1.6vmax;
         }
       }
 
@@ -200,6 +200,7 @@
         ol.error {
           overflow: auto;
           margin-top: 5px;
+          max-height: 5em;
 
           li {
             color: #f30;

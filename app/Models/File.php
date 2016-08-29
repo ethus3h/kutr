@@ -218,6 +218,7 @@ class File
      * @return bool|Song A Song object on success,
      *                   true if file exists but is unmodified,
      *                   or false on an error.
+     * @throw \Exception If it can not access a cover file (permission errors) for example.
      */
     public function sync($tags, $force = false)
     {
@@ -292,11 +293,7 @@ class File
         if (!$album->has_cover) {
             // If the album has no cover, we try to get the cover image from existing tag data
             if (!empty($info['cover'])) {
-                try {
-                    $album->generateCover($info['cover']);
-                } catch (Exception $e) {
-                    Log::error($e);
-                }
+                $album->generateCover($info['cover']);
             }
             // or, if there's a cover image under the same directory, use it.
             elseif ($cover = $this->getCoverFileUnderSameDirectory()) {

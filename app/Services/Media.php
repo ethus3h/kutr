@@ -159,7 +159,7 @@ class Media
 
             try {
                 $song = $file->sync($this->tags, false);
-            } catch(Exception $e) {
+            } catch(\Exception $e) {
                 $song = false;
                 $file->setSyncError($e->getMessage());
             }
