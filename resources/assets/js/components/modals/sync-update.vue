@@ -52,6 +52,14 @@
     methods: {
       stopSync() {
         this.shown = false;
+        this.songsDone = 0;
+        this.failedSongs = [];
+        this.songsTotal = 1;
+        if (this.buttonText == 'Done') {
+          // Refresh the interface after syncing
+          router.go('home');
+          forceReloadWindow();          
+        }
       },
 
       startSync() {
