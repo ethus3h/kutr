@@ -174,7 +174,7 @@ class File
         // - "part_of_a_compilation" tag (used by iTunes), or
         // - "albumartist" (used by non-retarded applications).
         $props['compilation'] = (bool) (
-            array_get($comments, 'part_of_a_compilation', [false])[0] || $props['albumartist']
+            array_get($comments, 'part_of_a_compilation', [false])[0] || $props['albumartist'] != $props['artist']
         );
 
         return $this->info = $props;
