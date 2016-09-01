@@ -6,7 +6,7 @@
     </h1>
 
     <div class="folders" :class="'as-' + viewMode">
-      <ul><folder-item :folder="sharedState.root"></ul>
+      <ul><folder-item :folder="sharedState.root" :level="0"></ul>
 
       <to-top-button :showing="showBackToTop"></to-top-button>
     </div>
@@ -65,7 +65,10 @@ export default {
   .folders {
     @include artist-album-wrapper();
     ul {
-      padding-left: 15px; 
+      width: 100%;
+      padding: 0;
+      margin: 0;
+      list-style: none;
     }
     overflow: auto;
   }

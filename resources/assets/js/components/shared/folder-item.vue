@@ -1,17 +1,31 @@
 <template>
   <li>
-    <div :class="{folder: isFolder}">
+    <div :class="{folder: isFolder}" :style="{marginLeft: (level ? level*20 : 4) + 'px'}">
+      <span class="fa" :class="{open: isOpen, close: !isOpen}" @click="toggle"></span>
+      <span class="name" @click="toggle">{{name}}</span>
       <span v-if="isFolder" class="folder">
         <a class="control" @click.prevent="play">
+          <i class="fa fa-play-circle"></i>
+          This
+        </a><a class="control" @click.prevent="playRecursive">
           <i class="fa fa-play"></i>
+          All
         </a>
       </span>
-      <span class="fa" :class="{open: isOpen, close: !isOpen}"></span>
-      <span class="name" @click="toggle">{{name}}</span>
     </div>
     <ul v-if="isFolder && isOpen">
-      <folder-item v-for="dir in subFolders" :folder="dir"></folder-item>
+      <folder-item v-for="dir in subFolders" :folder="dir" :level="level+1"></folder-item>
       <table v-if="hasSongs">
+        <thead>
+          <tr>
+            <th class="track-number">#</th>
+            <th class="title">Title</th>
+            <th class="artist">Artist</th>
+            <th class="album">Album</th>
+            <th class="time">Time</th>
+            <th class="play"></th>
+          </tr>
+        </thead>
         <tbody>
            <tr is="song-item" v-for="item in subSongs" :song="item" ref="rows"></tr>
         </tbody>
@@ -31,7 +45,7 @@ import songItem from './song-item.vue';
 
 export default {
   name: 'folder-item',
-  props: ['folder'],
+  props: ['folder', 'level'],
   filters: { pluralize },
   components: { songItem },
 
@@ -62,6 +76,17 @@ export default {
       return map(filter(this.folder.children, o => { return o.songId !== 0; }), o => songStore.byId(o.songId));
     },
 
+    subSongsRecursive() {
+      // Unfold the recursive array first (@todo make a nicer function here)
+      var children = [];
+      function unfold(o) {
+          forEach(o.children, i => { if (i.songId === 0) return unfold(i); children.push(songStore.byId(i.songId)); });
+      }
+      unfold(this.folder);
+      return children;
+    },
+
+
     subFolders() {
       return filter(this.folder.children, o => { return o.songId === 0; });
     },
@@ -80,7 +105,7 @@ export default {
 
 
     /**
-     * Play all songs in the current album in track order,
+     * Play all songs in the current folder in track order,
      * or queue them up if Ctrl/Cmd key is pressed.
      */
     play(e) {
@@ -90,6 +115,19 @@ export default {
         playback.queueAndPlay(orderBy(this.subSongs, 'track'));
       }
     },
+
+    /**
+     * Play all the songs found recursively in the current album in track order,
+     * or queue them up if Ctrl/Cmd key is pressed.
+     */
+    playRecursive(e) {
+      if (e.metaKey || e.ctrlKey) {
+        queueStore.queue(this.subSongsRecursive);
+      } else {
+        playback.queueAndPlay(this.subSongsRecursive);
+      }
+    },
+
 
     /**
      * Clicked a row in the children song list
@@ -136,32 +174,144 @@ export default {
 
 @include artist-album-card();
 
-div.folder {
-  > span.folder {
-    display: inline-block;
-    height: 2em;
+div.folders {
+  ul > table {
+    width: calc(100% - 20px);
+    margin: 0 10px;
+    background: $color2ndBgr;
+
+    td, th {
+      text-align: left;
+      padding: 8px;
+      vertical-align: middle;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
+
+      &.time {
+        width: 72px;
+        text-align: right;
+      }
+
+      &.track-number {
+        width: 42px;
+      }
+
+      &.artist {
+        width: 23%;
+      }
+
+      &.album {
+        width: 27%;
+      }
+
+      &.play {
+        display: none;
+
+        html.touchevents & {
+          display: block;
+          position: absolute;
+          top: 8px;
+          right: 4px;
+        }
+      }
+    }
+    th {
+        color: $color2ndText;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+    }
+  }
+  ul {
+    @media only screen and (max-width: 768px) {
+      table, tbody, tr {
+        display: block;
+      }
+
+      thead, tfoot {
+        display: none;
+      }
+
+      tr {
+        padding: 8px 32px 8px 4px;
+        position: relative;
+      }
+
+      td {
+        display: inline;
+        padding: 0;
+        vertical-align: bottom;
+        white-space: normal;
+
+        &.album, &.time, &.track-number {
+          display: none;
+        }
+
+        &.artist {
+          opacity: .5;
+          font-size: .9rem;
+          padding: 0 4px;
+        }
+      }
+    }
+  }
+  div.folder {
     line-height: 2em;
-    width: 2em;
-    background: #444;
-    border-radius: 50%;
-    text-align: center;
+    height: 2.2em;
+    border-bottom: 1px solid $color2ndBgr;
+
+    > span {
+      cursor: pointer;
+      display: inline-block;
+    }  
+    > span.folder {
+      text-align: center;
+      font-size: 1.3em;
+      margin-left: 1em;
+
+      a {
+        color: #FFF;
+        padding: 2px 5px;
+        text-transform: uppercase;
+        font-size: 0.7em;
+      }     
+      a:first-child {
+        background: $colorOrange;
+        border-radius: 5px 0 0 5px;
+      }
+      a:last-child {
+        background: $colorGreen;
+        border-radius: 0 5px 5px 0;
+      }
+    }
+    > span.open::before {
+      content: "\f0d7";
+      width: 20px;
+      height: 20px;
+      line-height: 20px;
+      text-align: center;
+      color: $colorHighlight;
+      margin-top: 2px;
+      padding-top: 1px;
+    }
+    > span.close::before {
+      content: "\f0da";
+      width: 20px;
+      height: 20px;
+      line-height: 20px;
+      text-align: center;
+      padding-left: 2px;
+    }
   }
-  > span.open::before {
-    content: "\f07c";
-  }
-  > span.close::before {
-    content: "\f07b";
-  }
-
-}
 
 
-.sep {
-  display: none;
-  color: $color2ndText;
+  .sep {
+    display: none;
+    color: $color2ndText;
 
-  .as-list & {
-    display: inline;
+    .as-list & {
+      display: inline;
+    }
   }
 }
 </style>
