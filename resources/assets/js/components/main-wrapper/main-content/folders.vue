@@ -5,7 +5,8 @@
       <view-mode-switch :mode="viewMode" for="folders"></view-mode-switch>
     </h1>
 
-    <div class="folders" :class="'as-' + viewMode">
+    <sound-bar v-if="loading" class="sbcenter"></sound-bar>
+    <div v-else class="folders" :class="'as-' + viewMode">
       <ul><folder-item :folder="sharedState.root" :level="0"></ul>
 
       <to-top-button :showing="showBackToTop"></to-top-button>
@@ -19,16 +20,18 @@ import { folderStore } from '../../../stores';
 import folderItem from '../../shared/folder-item.vue';
 import viewModeSwitch from '../../shared/view-mode-switch.vue';
 import infiniteScroll from '../../../mixins/infinite-scroll';
+import soundBar from '../../shared/sound-bar.vue';
 
 export default {
   mixins: [infiniteScroll],
-  components: { folderItem, viewModeSwitch },
+  components: { folderItem, viewModeSwitch, soundBar },
 
   data() {
     return {  
       q: '', // the filter text, currently ignored
       sharedState: folderStore.state,
       viewMode: null,
+      loading: true,
     };
   },
 
@@ -51,6 +54,7 @@ export default {
 
       'koel:hierarchyready': () => {
          this.sharedState = folderStore.state;
+         this.loading = false;
       },
     });
   },
@@ -71,6 +75,18 @@ export default {
       list-style: none;
     }
     overflow: auto;
+  }
+  .sbcenter {
+    margin: 10px auto;
+  }
+  .sbcenter::after {
+    content: 'Loading folder hierarchy...';
+    width: 200px;
+    display: inline-block;
+    margin: 0 30px;
+    line-height: 13px;
+    color: $color2ndText;
+    vertical-align: top;
   }
 }
 </style>
