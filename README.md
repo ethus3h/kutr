@@ -30,10 +30,18 @@ If you are upgrading, see [Releases](https://github.com/phanan/koel/releases) fo
 The `.env.example` contains the new keys required to use the new features. If you already have a `.env` file on your koel installation, just diff them and add the missing keys.
 
 Typically, if you intend to integrate **kotr** in your CMS/web application, you'll have to follow the steps described in `cms_login.php.example` to glue the required calls in **kotr**. This file has to be modified to fit your CMS and stored in your CMS/web application (it must be in the same subdomain as your application so the CMS's session is accessible).
+**kotr** does not use cookies to store its sessions, but browser's LocalStorage.
+
+## Screenshots
+The new features include folder browsing:
+![folder](http://i.imgur.com/M08eb1M.png)
+
+Live media library sync update:
+![sync](http://i.imgur.com/4R9rfES.png)
+
 
 ## Updating
 
 Also, since late update from Koel's master branch, you might encounter some difficulties with updating the code with `composer install`. 
 Make sure you have `BROADCAST_DRIVER=null` in your `.env` file
-
 
