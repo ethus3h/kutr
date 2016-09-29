@@ -210,6 +210,25 @@ class File
     }
 
     /**
+     * Check if a ".virtual-album" file exists in the current folder.
+     * In that case, the current "album" tag (if it exists) is replaced by the name of the folder
+     * This allows to store many "unrelated" song in a folder and they'll appear as if they were
+     * part of a simple album, and not clutter the album list with numerous "1 song" albums.
+     *
+     * @param array $info     The extracted tags to sync
+     */
+    private function checkVirtualAlbum(&$info)
+    {
+        $folderName = pathinfo($this->path, PATHINFO_DIRNAME);
+        // Check if a virtual album file exists in the current song's folder
+        if (!file_exists($folderName.'/.virtual-album')) {
+            return;
+        }
+
+        $info['album'] = basename($folderName);
+    }
+
+    /**
      * Sync the song with all available media info against the database.
      *
      * @param array $tags  The (selective) tags to sync (if the song exists)
@@ -257,6 +276,10 @@ class File
 
             $info = array_intersect_key($info, array_flip($tags));
 
+            // Check for the presence of a virtual album file in the current folder to override
+            // the current song's album tag
+            $this->checkVirtualAlbum($info);
+
             // If the "artist" tag is specified, use it.
             // Otherwise, re-use the existing model value.
             $artist = isset($info['artist']) ? Artist::get($info['artist']) : $this->song->album->artist;
@@ -282,6 +305,10 @@ class File
             // The file is newly added.
             $isCompilation = (bool) array_get($info, 'compilation');
             $artist = Artist::get($info['artist']);
+
+            // Check for the presence of a virtual album file in the current folder to override
+            // the current song's album tag
+            $this->checkVirtualAlbum($info);
 
             // Check if we need to set up the compilation flag by ourselves
             if (!$isCompilation) {

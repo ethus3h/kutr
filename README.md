@@ -11,7 +11,7 @@ This will add many experimental features such as:
 - A GUI that does not errors out  (~~for example while importing songs with a progress bar, or drag and dropping songs~~, or selecting songs when column ordering is on) [PARTIALLY DONE]
 - ~~The ability to install Koel under a CMS (using your CMS' authentication)~~ [DONE]
 - ~~The ability to logout directly from your CMS~~ [DONE]
-- Per folder "virtual album" (that is, if you save a '.virtual-album' file in a folder with numerous different songs, including "various" artists, "various" albums), they will appear in an album called the same as the folder, under "Various Artists", and will not clutter the album/artist listing with pletora of songs) [STARTED] 
+- ~~Per folder "virtual album" (that is, if you save a '.virtual-album' file in a folder with numerous different songs, including "various" artists, "various" albums), they will appear in an album called the same as the folder, under "Various Artists", and will not clutter the album/artist listing with pletora of songs)~~ [DONE] 
 - Per user library with sharing capabilities [STARTED]
 
 I'm trying to keep the changes to phanan's master branch as a minimum so it'll be possible to merge his modifications easily. However, I don't promise I'm not breaking things, but since I'm eating my own dog food, I should be well aware of bug I've induced.
