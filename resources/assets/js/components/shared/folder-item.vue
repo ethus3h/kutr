@@ -37,6 +37,7 @@
 <script>
 import { find, map, filter, forEach } from 'lodash';
 import $ from 'jquery';
+import Vue from 'vue';
 
 import { pluralize, orderBy } from '../../utils';
 import { queueStore, artistStore, sharedStore, folderStore, songStore } from '../../stores';
@@ -97,10 +98,24 @@ export default {
      * Toggle this folder view
      */
     toggle(e) {
-      // @todo: should close all other folders in the current sibling level to avoid cluttering the interface
       // Need to close all siblings here first
       forEach(this.$parent.$children, comp => { if ("isOpen" in comp && comp.isOpen && comp.name !== this.name) comp.isOpen = false; });
       this.isOpen = !this.isOpen;
+      if (this.isOpen) {
+        Vue.nextTick(() => {
+          // Scroll to ensure it's visible
+          var $this = $(e.target);
+          var container = $('#foldersContainer');
+          var distance = $this.offset().top - container.offset().top;
+          if (Math.abs(distance) < container.height()) {
+            // If the element is visible animate scrolling to it
+            container.animate({ scrollTop: distance + container.scrollTop() });
+          } else {
+            // Element is not visible, so don't wait time animating, it's distracting, just fix the scrolling position so it fits directly on the toggled element
+            container.scrollTop(distance + container.scrollTop());
+          }
+        });
+      }
     },
 
 

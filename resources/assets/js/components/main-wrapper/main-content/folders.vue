@@ -6,7 +6,7 @@
     </h1>
 
     <sound-bar v-if="loading" class="sbcenter"></sound-bar>
-    <div v-else class="folders" :class="'as-' + viewMode">
+    <div v-else class="folders" :class="'as-' + viewMode" id="foldersContainer">
       <ul><folder-item :folder="sharedState.root" :level="0"></ul>
 
       <to-top-button :showing="showBackToTop"></to-top-button>
