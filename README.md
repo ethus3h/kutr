@@ -29,7 +29,10 @@ If you are upgrading, see [Releases](https://github.com/phanan/koel/releases) fo
 
 The `.env.example` contains the new keys required to use the new features. If you already have a `.env` file on your koel installation, just diff them and add the missing keys.
 
-Typically, if you intend to integrate **kutr** in your CMS/web application, you'll have to follow the steps described in `cms_login.php.example` to glue the required calls in **kutr**. This file has to be modified to fit your CMS and stored in your CMS/web application (it must be in the same subdomain as your application so the CMS's session is accessible).
+Typically, if you intend to integrate **kutr** in your CMS/web application, you'll have to follow the steps described in `cms_login.php.example` to glue the required calls in **kutr**. 
+This file has to be modified to fit your CMS and stored in your CMS/web application (it must be in the same subdomain as your application so the CMS's session is accessible).
+Else, you need to change the line that read `const USING_CMS = true;` in resources/assets/js/app.vue to `const USING_CMS = false;`
+
 **kutr** does not use cookies to store its sessions, but browser's LocalStorage.
 
 ## Screenshots
