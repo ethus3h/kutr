@@ -16,7 +16,9 @@ function parseEnv()
 
 // Set the secret you've used in your CMS code in .env file
 $env = parseEnv();
-$redir = $env["REMOTE_AUTH_LOGOUT_URL"] ?: "/";
+$disconnect = isset($_GET["disconnect"]);
+$defaultRedir = $env["REMOTE_AUTH_LOGOUT_URL"] ?: "/";
+$redir = $disconnect ? ($env["REMOTE_AUTH_DISCONNECT_URL"] ?: $defaultRedir) : $defaultRedir;
 $secret = $env["REMOTE_AUTH_SECRET"];
 
 $token = isset($_GET["token"]) ? $_GET["token"] : "";
@@ -57,7 +59,7 @@ if (!$isAuthorized)
     $users = DB::table('users')->get();
     foreach ($users as $user)
     {
-        if (strcasecmp($user->name, $username) == 0) 
+        if (strcasecmp($user->name, $username) == 0)
         {
                 $auth = Auth::loginUsingId($user->id, true);
                 Auth::setUser($auth);
