@@ -8,11 +8,12 @@ This will add many experimental features such as:
 - Storing all the available tags whenever possible like genre and being able to browse via them (thanks to @alex-phillips)
 - ~~The capability to browse your music collection by folders too~~ [DONE]
 - ~~A smarter tag extraction for invalid files~~ [DONE]
-- A GUI that does not errors out  (~~for example while importing songs with a progress bar, or drag and dropping songs~~, or selecting songs when column ordering is on) [PARTIALLY DONE]
+- ~~A GUI that does not errors out  (for example while importing songs with a progress bar, or drag and dropping songs, or selecting songs when column ordering is on)~~ [DONE]
 - ~~The ability to install Koel under a CMS (using your CMS' authentication)~~ [DONE]
 - ~~The ability to logout directly from your CMS~~ [DONE]
 - ~~Per folder "virtual album" (that is, if you save a '.virtual-album' file in a folder with numerous different songs, including "various" artists, "various" albums), they will appear in an album called the same as the folder, under "Various Artists", and will not clutter the album/artist listing with pletora of songs)~~ [DONE] 
 - Per user library with sharing capabilities [STARTED]
+- An Android player application [STARTED]
 
 I'm trying to keep the changes to phanan's master branch as a minimum so it'll be possible to merge his modifications easily. However, I don't promise I'm not breaking things, but since I'm eating my own dog food, I should be well aware of bug I've induced.
 Also, I'm submitting my changes to phanan's repository, but he might decides not to merge them. In that case, they'll stay here for you to use if you need them.
