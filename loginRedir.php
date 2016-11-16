@@ -57,11 +57,13 @@ if (!$isAuthorized)
     $users = DB::table('users')->get();
     foreach ($users as $user)
     {
-        if (strcasecmp($user->name, $username) == 0)
-        $auth = Auth::loginUsingId($user->id, true);
-        Auth::setUser($auth);
-        $jwToken = JWTAuth::fromUser($auth);
-        break;
+        if (strcasecmp($user->name, $username) == 0) 
+        {
+                $auth = Auth::loginUsingId($user->id, true);
+                Auth::setUser($auth);
+                $jwToken = JWTAuth::fromUser($auth);
+                break;
+        }
     }
 }
 
