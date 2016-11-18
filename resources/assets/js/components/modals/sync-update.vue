@@ -62,7 +62,7 @@
         }
       },
 
-      startSync() {
+      startSync(forceClean) {
         this.shown = true;
         this.$nextTick(function() {
                   this.progress = new progressbar.Circle("#progressBar", {
@@ -91,7 +91,7 @@
                                   circle.setText(that.syncData.songsDone + '/' + that.syncData.songsTotal);
                                 }
                               });
-                this.getStatus(true);
+                this.getStatus(forceClean);
               });
       },
 

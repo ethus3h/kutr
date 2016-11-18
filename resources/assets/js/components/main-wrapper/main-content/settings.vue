@@ -4,7 +4,7 @@
       <span>Settings</span>
     </h1>
 
-    <form @submit.prevent="confirmThenSave" class="main-scroll-wrap">
+    <form @submit.prevent="confirmThenSave" class="main-scroll-wrap" @keydown="keyDown" @keyup="keyUp" @mousemove="checkAlt">
       <div class="form-row">
         <label for="inputSettingsPath">Media Path</label>
         <p class="help">
@@ -28,7 +28,7 @@
 
       <div class="form-row">
         <button type="submit">Save settings</button>
-        <button type="button" @click="scanLibrary">Scan library</button>
+        <button type="button" @click="scanLibrary" v-bind:class="{forced: isForced}" >Scan library {{forceSyncTxt}}</button>
       </div>
     </form>
     <sync-update ref="syncUpdate"></sync-update>
@@ -47,12 +47,21 @@ export default {
 
   data() {
     return {
+      forceSyncTxt: '',
       state: settingStore.state,
       sharedState: sharedStore.state
     }
   },
 
   computed: {
+    /**
+     * Check if the synchronization requires cleaning the library first
+     *
+     * @return {boolean}
+    isForced() { 
+      return this.forceSyncTxt != ''; 
+    },
+
     /**
      * Determine if we should warn the user upon saving.
      *
@@ -101,7 +110,21 @@ export default {
      * Scan the given path
      */
     scanLibrary() {
-      this.$refs.syncUpdate.startSync()
+      this.$refs.syncUpdate.startSync(this.forceSyncTxt != '')
+    },
+
+    /**
+     * Check if the user is pressing Alt key down (and react in that case)
+     */
+    checkAlt(e) {
+      this.forceSyncTxt = e.altKey ? '(Clear library)' : ''
+    },
+    keyDown(e) {
+      this.forceSyncTxt = e.keyCode == 18 ? '(Clear library)' : ''
+    },
+    keyUp(e) {
+      if (e.keyCode == 18 && this.forceSyncTxt != '') 
+        this.forceSyncTxt = ''
     }
   }
 };
@@ -115,6 +138,9 @@ export default {
   input[type="text"] {
     width: 384px;
     margin-top: 12px;
+  }
+  button[type="button"].forced {
+    background: $colorOrange;
   }
 
   @media only screen and (max-width : 667px) {
