@@ -10,6 +10,7 @@ use App\Models\Artist;
 use App\Models\File;
 use App\Models\Setting;
 use App\Models\Song;
+use App\Models\Genre;
 use getID3;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\Finder\Finder;
@@ -28,6 +29,9 @@ class Media
         'title',
         'length',
         'track',
+        'disc',
+        'genre',
+        'year',
         'lyrics',
         'cover',
         'mtime',

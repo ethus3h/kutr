@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API;
 
 use App\Application;
 use App\Models\Artist;
+use App\Models\Genre;
 use App\Models\Interaction;
 use App\Models\Playlist;
 use App\Models\Setting;
@@ -27,7 +28,16 @@ class DataController extends Controller
             $playlist['songs'] = array_pluck($playlist['songs'], 'id');
         }
 
+        $genres = Genre::orderBy('name')->with('songs')->get()->toArray();
+
+        // We don't need full song data either here, only ID's
+        foreach ($genres as &$genre) {
+            $genre['songs'] = array_pluck($genre['songs'], 'id');
+        }
+
+
         return response()->json([
+            'genres' => $genres,
             'artists' => Artist::orderBy('name')->with('albums', with('albums.songs'))->get(),
             'settings' => auth()->user()->is_admin ? Setting::pluck('value', 'key')->all() : [],
             'playlists' => $playlists,
