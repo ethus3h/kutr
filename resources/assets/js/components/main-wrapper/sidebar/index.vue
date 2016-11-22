@@ -24,6 +24,9 @@
           <a :class="['artists', currentView == 'artists' ? 'active' : '']" href="/#!/artists">Artists</a>
         </li>
         <li>
+          <a :class="['genres', currentView == 'genres' ? 'active' : '']" href="/#!/genres">Genres</a>
+        </li>
+        <li>
           <a class="folders" :class="[currentView == 'folders' ? 'active' : '']" href="/#!/folders">Folders</a>
         </li>
         <li v-if="sharedState.useYouTube">
@@ -235,6 +238,11 @@ export default {
 
       &.artists::before {
         content: "\f130";
+      }
+
+      &.genres::before {
+        content: "\f500";
+        font-family: kutr;
       }
 
       &.folders::before {

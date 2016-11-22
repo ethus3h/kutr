@@ -26,6 +26,7 @@ class AddGenreIdToSongsTable extends Migration
     public function down()
     {
         Schema::table('songs', function (Blueprint $table) {
+            $table->dropForeign('songs_genre_id_foreign');
             $table->dropColumn('genre_id');
         });
     }

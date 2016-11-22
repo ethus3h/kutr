@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Genre;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 
@@ -17,6 +18,11 @@ class AddGenreTable extends Migration
             $table->string('name')->unique();
             $table->timestamps();
         });
+
+        Genre::create([
+            'id' => Genre::UNKNOWN_ID,
+            'name' => Genre::UNKNOWN_NAME,
+        ]);
     }
 
     /**
