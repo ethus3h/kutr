@@ -16,6 +16,8 @@
   import { every, filter } from 'lodash';
   import progressbar from 'progressbar.js';
   import { http } from '../../services';
+  import { forceReloadWindow } from '../../utils';
+  import router from '../../router';
 
   export default {
 
