@@ -8,6 +8,8 @@
     <album v-show="view === 'album'"/>
     <artists v-show="view === 'artists'"/>
     <artist v-show="view === 'artist'"/>
+    <genres v-show="view === 'genres'"/>
+    <genre v-show="view === 'genre'"/>
     <folders v-show="view === 'folders'"/>
     <users v-show="view === 'users'"/>
     <settings v-show="view === 'settings'"/>
@@ -24,6 +26,8 @@ import { albumStore, sharedStore } from '../../../stores'
 
 import albums from './albums.vue'
 import album from './album.vue'
+import genres from './genres.vue'
+import genre from './genre.vue'
 import artists from './artists.vue'
 import artist from './artist.vue'
 import folders from './folders.vue'
@@ -38,7 +42,7 @@ import profile from './profile.vue'
 import youtubePlayer from './youtube-player.vue'
 
 export default {
-  components: { albums, album, artists, artist, folders, songs, settings,
+  components: { albums, album, artists, artist, genres, genre, folders, songs, settings,
     users, home, queue, playlist, favorites, profile, youtubePlayer },
 
   data () {

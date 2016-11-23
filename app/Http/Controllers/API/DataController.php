@@ -28,13 +28,8 @@ class DataController extends Controller
             $playlist['songs'] = array_pluck($playlist['songs'], 'id');
         }
 
-        $genres = Genre::orderBy('name')->with('songs')->get()->toArray();
-
-        // We don't need full song data either here, only ID's
-        foreach ($genres as &$genre) {
-            $genre['songs'] = array_pluck($genre['songs'], 'id');
-        }
-
+        // We don't need songs, the javascript code will figure this out
+        $genres = Genre::orderBy('name')->get()->toArray();
 
         return response()->json([
             'genres' => $genres,
