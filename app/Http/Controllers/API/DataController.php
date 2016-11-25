@@ -30,6 +30,10 @@ class DataController extends Controller
 
         // We don't need songs, the javascript code will figure this out
         $genres = Genre::orderBy('name')->get()->toArray();
+        // Don't waste bandwidth sending null values for image
+        foreach($genres as &$genre) {
+            if (is_null($genre['image'])) unset($genre['image']);
+        }
 
         return response()->json([
             'genres' => $genres,

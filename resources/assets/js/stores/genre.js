@@ -10,7 +10,7 @@ export const genreStore = {
   stub,
 
   state: {
-    genres: [],
+    genres: [stub],
   },
 
   /**
@@ -35,7 +35,7 @@ export const genreStore = {
     // Will be filled later on by while the song store is initializing
     genre.songs = genre.songs ? genre.songs : [];
     Vue.set(genre, 'songCount', genre.songs.length);
-    if (!genre.image) genre.image = config.unknownCover; //@todo Improve this to generate a useful cover for this genre
+    if (!genre.image) genre.image = config.unknownCover;
 
     return genre;
   },
