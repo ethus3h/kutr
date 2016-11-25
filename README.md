@@ -55,3 +55,7 @@ Browsing by genres:
 Also, since late update from Koel's master branch, you might encounter some difficulties with updating the code with `composer install`. 
 Make sure you have `BROADCAST_DRIVER=null` in your `.env` file
 
+Because I'm rebasing from Koel's master branch, the history for my master branch is changing, and this will likely confuse your git client.
+Rebase is easier for me than merging (less work), and produce a cleaner and linear history. 
+The drawback is that you'll have to perform `git pull --rebase` to get the new code from my repository (don't do a `git fetch` ;-)
+
