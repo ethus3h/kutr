@@ -24,6 +24,8 @@ use YouTube;
  * @property int    track
  * @property int    album_id
  * @property int    id
+ * @property int    genre_id
+ * @property Genre  genre
  */
 class Song extends Model
 {
@@ -161,7 +163,7 @@ class Song extends Model
                 $single ? (int) $data['track'] : $song->track,
                 intval($data['disc']) ?: $song->disc,
                 intval($data['albumYear']) ?: $song->album->year,
-                trim($data['genre']) ?: $song->genre,
+                trim($data['genre']) ?: $song->genre->name,
                 (int) $data['compilationState']
             );
         }
@@ -184,12 +186,12 @@ class Song extends Model
      * @param int    $track
      * @param int    $disc
      * @param int    $year
-     * @param string $genre
+     * @param string $genreName
      * @param int    $compilationState
      *
      * @return self
      */
-    public function updateSingle($title, $albumName, $artistName, $lyrics, $track, $disc, $year, $genre, $compilationState)
+    public function updateSingle($title, $albumName, $artistName, $lyrics, $track, $disc, $year, $genreName, $compilationState)
     {
         // If the artist name is "Various Artists", it's a compilation song no matter what.
         if ($artistName === Artist::VARIOUS_NAME) {
@@ -215,14 +217,14 @@ class Song extends Model
             $album = Album::get(Artist::getVarious(), $albumName, $year, true);
         }
 
-        $genre_id = Genre::get($genre);
+        $genre = Genre::get($genreName);
 
         $this->title = $title;
         $this->album_id = $album->id;
         $this->lyrics = $lyrics;
         $this->disc = $disc;
         $this->track = $track;
-        $this->genre_id = $genre_id;
+        $this->genre_id = $genre->id;
 
         $this->save();
 
