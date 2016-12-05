@@ -1,8 +1,16 @@
 <template>
   <section id="foldersWrapper">
     <h1 class="heading">
-      <span>Folders</span>
-      <view-mode-switch :mode="viewMode" for="folders"></view-mode-switch>
+      <span>Folders
+        <controls-toggler :showing-controls="showingControls" @toggleControls="toggleControls"/>
+      </span>
+      <song-list-controls
+        v-show="sharedState.root && selectedSongs.length && (!isPhone || showingControls)"
+        @shuffleAll="shuffleAll"
+        @shuffleSelected="shuffleSelected"
+        :config="songListControlConfig"
+        :selectedSongs="selectedSongs"
+      />
     </h1>
 
     <sound-bar v-if="loading" class="sbcenter"></sound-bar>
@@ -15,50 +23,57 @@
 </template>
 
 <script>
-import { filterBy, limitBy, event } from '../../../utils';
-import { folderStore } from '../../../stores';
-import folderItem from '../../shared/folder-item.vue';
-import viewModeSwitch from '../../shared/view-mode-switch.vue';
-import infiniteScroll from '../../../mixins/infinite-scroll';
-import soundBar from '../../shared/sound-bar.vue';
+import { filterBy, limitBy, event } from '../../../utils'
+import { folderStore } from '../../../stores'
+import folderItem from '../../shared/folder-item.vue'
+import infiniteScroll from '../../../mixins/infinite-scroll'
+import hasSongList from '../../../mixins/has-song-list'
+import soundBar from '../../shared/sound-bar.vue'
 
 export default {
-  mixins: [infiniteScroll],
-  components: { folderItem, viewModeSwitch, soundBar },
+  mixins: [infiniteScroll, hasSongList],
+  components: { folderItem, soundBar },
 
   data() {
     return {  
       q: '', // the filter text, currently ignored
       sharedState: folderStore.state,
       viewMode: null,
-      loading: true,
-    };
+      hasSelection: false,
+      loading: true
+    }
   },
 
-  computed: {
-  },
+  computed: {},
 
   methods: {
     changeViewMode(mode) {
-      this.viewMode = mode;
-    },
+      this.viewMode = mode
+    }
   },
 
   created() {
     event.on({
       'koel:teardown': () => {
-        this.q = '';
+        this.q = ''
       },
 
       'filter:changed': q => this.q = q,
 
       'koel:hierarchyready': () => {
-         this.sharedState = folderStore.state;
-         this.loading = false;
+         this.sharedState = folderStore.state
+         this.loading = false
       },
-    });
-  },
-};
+
+      'folder-song:unselect': () => {
+         this.selectedSongs = []
+      },
+
+      'folder-song:select': songs => this.selectedSongs = songs
+    
+    })
+  }
+}
 </script>
 
 <style lang="sass">
@@ -74,6 +89,10 @@ export default {
       margin: 0;
       list-style: none;
     }
+    ul.menu {
+      min-width: 144px;
+      width: auto;
+    }
     overflow: auto;
   }
   .sbcenter {
@@ -81,12 +100,13 @@ export default {
   }
   .sbcenter::after {
     content: 'Loading folder hierarchy...';
-    width: 200px;
+    width: 250px;
     display: inline-block;
-    margin: 0 30px;
+    margin: 0 30px 0 10px;
     line-height: 13px;
     color: $color2ndText;
     vertical-align: top;
+    position: absolute;
   }
 }
 </style>

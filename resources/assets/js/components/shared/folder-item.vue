@@ -27,28 +27,31 @@
           </tr>
         </thead>
         <tbody>
-           <tr is="song-item" v-for="item in subSongs" :song="item" ref="rows"></tr>
+           <tr is="song-item" v-for="item in subSongs" :song="item" ref="rows" @itemClicked="itemClicked" :key="item.id"></tr>
         </tbody>
       </table>
+      <song-menu ref="contextMenu" :songs="selectedSongs"/>
     </ul>
   </li>
 </template>
 
 <script>
-import { find, map, filter, forEach } from 'lodash';
-import $ from 'jquery';
-import Vue from 'vue';
+import { find, map, filter, forEach, invokeMap } from 'lodash'
+import isMobile from 'ismobilejs'
+import $ from 'jquery'
+import Vue from 'vue'
 
-import { pluralize, orderBy } from '../../utils';
-import { queueStore, artistStore, sharedStore, folderStore, songStore } from '../../stores';
-import { playback, download } from '../../services';
-import songItem from './song-item.vue';
+import { pluralize, orderBy, event } from '../../utils'
+import { queueStore, artistStore, sharedStore, folderStore, songStore } from '../../stores'
+import { playback, download } from '../../services'
+import songItem from './song-item.vue'
+import songMenu from './song-menu.vue'
 
 export default {
   name: 'folder-item',
   props: ['folder', 'level'],
   filters: { pluralize },
-  components: { songItem },
+  components: { songItem, songMenu },
 
   watch: {
     folder: function(val, oldVal) {
@@ -61,35 +64,36 @@ export default {
       isOpen: false,
       sharedState: sharedStore.state,
       name: this.folder.name,
-    };
+      selectedSongs: []
+    }
   },
 
   computed: {
     isFolder() {
-      return this.folder.children.length !== 0;
+      return this.folder.children.length !== 0
     },
     
     hasSongs() {
-      return find(this.folder.children, o => { return o.songId !== 0; }) !== undefined;
+      return find(this.folder.children, o => { return o.songId !== 0 }) !== undefined
     },
 
     subSongs() {
-      return map(filter(this.folder.children, o => { return o.songId !== 0; }), o => songStore.byId(o.songId));
+      return map(filter(this.folder.children, o => { return o.songId !== 0 }), o => songStore.byId(o.songId))
     },
 
     subSongsRecursive() {
       // Unfold the recursive array first (@todo make a nicer function here)
-      var children = [];
+      var children = []
       function unfold(o) {
-          forEach(o.children, i => { if (i.songId === 0) return unfold(i); children.push(songStore.byId(i.songId)); });
+          forEach(o.children, i => { if (i.songId === 0) return unfold(i); children.push(songStore.byId(i.songId)) })
       }
-      unfold(this.folder);
-      return children;
+      unfold(this.folder)
+      return children
     },
 
 
     subFolders() {
-      return filter(this.folder.children, o => { return o.songId === 0; });
+      return filter(this.folder.children, o => { return o.songId === 0; })
     },
   },
 
@@ -99,20 +103,20 @@ export default {
      */
     toggle(e) {
       // Need to close all siblings here first
-      forEach(this.$parent.$children, comp => { if ("isOpen" in comp && comp.isOpen && comp.name !== this.name) comp.isOpen = false; });
-      this.isOpen = !this.isOpen;
+      forEach(this.$parent.$children, comp => { if ("isOpen" in comp && comp.isOpen && comp.name !== this.name) comp.isOpen = false })
+      this.isOpen = !this.isOpen
       if (this.isOpen) {
         Vue.nextTick(() => {
           // Scroll to ensure it's visible
-          var $this = $(e.target);
-          var container = $('#foldersContainer');
-          var distance = $this.offset().top - container.offset().top;
+          var $this = $(e.target)
+          var container = $('#foldersContainer')
+          var distance = $this.offset().top - container.offset().top
           if (Math.abs(distance) < container.height()) {
             // If the element is visible animate scrolling to it
-            container.animate({ scrollTop: distance + container.scrollTop() });
+            container.animate({ scrollTop: distance + container.scrollTop() })
           } else {
             // Element is not visible, so don't wait time animating, it's distracting, just fix the scrolling position so it fits directly on the toggled element
-            container.scrollTop(distance + container.scrollTop());
+            container.scrollTop(distance + container.scrollTop())
           }
         });
       }
@@ -125,9 +129,9 @@ export default {
      */
     play(e) {
       if (e.metaKey || e.ctrlKey) {
-        queueStore.queue(this.subSongs);
+        queueStore.queue(this.subSongs)
       } else {
-        playback.queueAndPlay(orderBy(this.subSongs, 'track'));
+        playback.queueAndPlay(orderBy(this.subSongs, 'track'))
       }
     },
 
@@ -137,24 +141,116 @@ export default {
      */
     playRecursive(e) {
       if (e.metaKey || e.ctrlKey) {
-        queueStore.queue(this.subSongsRecursive);
+        queueStore.queue(this.subSongsRecursive)
       } else {
-        playback.queueAndPlay(this.subSongsRecursive);
+        playback.queueAndPlay(this.subSongsRecursive)
       }
     },
 
+    /**
+     * Get the song-item component that's associated with a song ID.
+     *
+     * @param  {String} id The song ID.
+     *
+     * @return {Object}  The Vue compoenent
+     */
+    getComponentBySongId (id) {
+      return find(this.$refs.rows, { song: { id }})
+    },
 
     /**
-     * Clicked a row in the children song list
+     * Capture A keydown event and select all if applicable.
+     *
+     * @param {Object} e The keydown event.
      */
-    rowClick(songId, e) {
-      // @todo: Wait until phanan change the selection code logic, as I'm wondering it'll break here anyway
+    handleA (e) {
+      if (!e.metaKey && !e.ctrlKey) {
+        return
+      }
+      invokeMap(this.$refs.rows, 'select')
+      this.gatherSelected()
     },
+
+    /**
+     * Gather all selected songs.
+     *
+     * @return {Array.<Object>} An array of Song objects
+     */
+    gatherSelected () {
+      const selectedRows = filter(this.$refs.rows, { selected: true })
+      const ids = map(selectedRows, row => row.song.id)
+      this.selectedSongs = songStore.byIds(ids)
+    },
+
+    /**
+     * Handle the click event on a row to perform selection.
+     *
+     * @param  {String} songId
+     * @param  {Object} e
+     */
+    itemClicked (songId, e) {
+      const row = this.getComponentBySongId(songId)
+      // If we're on a touch device, or if Ctrl/Cmd key is pressed, just toggle selection.
+      if (isMobile.any) {
+        this.toggleRow(row)
+        this.gatherSelected()
+        return
+      }
+      if (e.ctrlKey || e.metaKey) {
+        this.toggleRow(row)
+      }
+      if (e.button === 0) {
+        if (!e.ctrlKey && !e.metaKey && !e.shiftKey) {
+          this.clearSelection()
+          this.toggleRow(row)
+        }
+        if (e.shiftKey && this.lastSelectedRow && this.lastSelectedRow.$el) {
+          this.selectRowsBetweenIndexes([this.lastSelectedRow.$el.rowIndex, row.$el.rowIndex])
+        }
+      }
+      this.gatherSelected()
+    },
+
+    /**
+     * Toggle select/unslect a row.
+     *
+     * @param  {Object} row The song-item component
+     */
+    toggleRow (row) {
+      row.toggleSelectedState()
+      this.lastSelectedRow = row
+    },
+
+    selectRowsBetweenIndexes (indexes) {
+      indexes.sort((a, b) => a - b)
+      const rows = this.$refs.rows
+      for (let i = indexes[0]; i <= indexes[1]; ++i) {
+        this.getComponentBySongId(rows[i - 1].song.id).select()
+      }
+    },
+
+    /**
+     * Clear the current selection on this song list.
+     */
+    clearSelection () {
+      invokeMap(this.$refs.rows, 'deselect')
+      this.gatherSelected()
+      this.$emit('folder-song:unselect');
+    },
+
     /**
      * Clicked on a row with Ctrl pressed
      */
     openContextMenu(songId, e) {
-      // @todo: Copy the context menu component code from the song list here, or ignore it ?
+      // If the user is right-clicking an unselected row,
+      // clear the current selection and select it instead.
+      const currentRow = this.getComponentBySongId(songId)
+      if (!currentRow.selected) {
+        this.clearSelection()
+        currentRow.select()
+        this.gatherSelected()
+      }
+      this.$nextTick(() => this.$refs.contextMenu.open(e.pageY, e.pageX))
     },
      
 
@@ -169,18 +265,76 @@ export default {
     /**
      * Allow dragging the album (actually, its songs).
      */
-    dragStart(e) {
-      const songIds = map(this.subSongs, 'id');
-      e.dataTransfer.setData('application/x-koel.text+plain', songIds);
-      e.dataTransfer.effectAllowed = 'move';
-
-      // Set a fancy drop image using our ghost element.
-      const $ghost = $('#dragGhost').text(`All ${songIds.length} song${songIds.length === 1 ? '' : 's'} in ${this.folder.name}`);
-      e.dataTransfer.setDragImage($ghost[0], 0, 0);
+    dragStart(songId, e) {
+      // If the user is dragging an unselected row, clear the current selection.
+      const currentRow = this.getComponentBySongId(songId)
+      if (!currentRow.selected) {
+        this.clearSelection()
+        currentRow.select()
+        this.gatherSelected()
+      }
+      this.$nextTick(() => {
+        const songIds = map(this.selectedSongs, 'id')
+        e.dataTransfer.setData('application/x-koel.text+plain', songIds)
+        e.dataTransfer.effectAllowed = 'move'
+        // Set a fancy drop image using our ghost element.
+        const $ghost = $('#dragGhost').text(`${songIds.length} song${songIds.length === 1 ? '' : 's'}`)
+        e.dataTransfer.setDragImage($ghost[0], 0, 0)
+      })
     },
 
+    /**
+     * Add a "droppable" class and set the drop effect when other songs are dragged over a row.
+     *
+     * @param {String} songId
+     * @param {Object} e The dragover event.
+     */
+    allowDrop (songId, e) {
+        return false
+    },
+
+    /**
+     * Remove the droppable state (and the styles) from a row.
+     *
+     * @param  {Object} e
+     */
+    removeDroppableState (e) {
+    }
+
   },
-};
+  
+  created () {
+    event.on({
+      /**
+       * Listen to song:played event to do some logic.
+       *
+       * @param  {Object} song The current playing song.
+       */
+      'song:played': song => {
+        // Scroll the item into view if it's lost into oblivion.
+        const $wrapper = $(this.$refs.wrapper)
+        const $row = $wrapper.find(`.song-item[data-song-id="${song.id}"]`)
+        if (!$row.length) {
+          return
+        }
+        if ($wrapper[0].getBoundingClientRect().top + $wrapper[0].getBoundingClientRect().height < $row[0].getBoundingClientRect().top) {
+          $wrapper.scrollTop($wrapper.scrollTop() + $row.position().top)
+        }
+      },
+
+      /**
+       * Clears the current list's selection if the user has switched to another view.
+       */
+      'main-content-view:load': () => this.clearSelection(),
+
+      /**
+       * Listen to 'song:selection-clear' (often broadcasted from the direct parent)
+       * to clear the selected songs.
+       */
+      'song:selection-clear': () => this.clearSelection()
+    })
+  }
+}
 </script>
 
 <style lang="sass">
@@ -190,6 +344,11 @@ export default {
 @include artist-album-card();
 
 div.folders {
+  ul.menu {
+    min-width: 144px;
+    width: auto;
+  }
+
   ul > table {
     width: calc(100% - 20px);
     margin: 0 10px;
