@@ -5,7 +5,7 @@
         <controls-toggler :showing-controls="showingControls" @toggleControls="toggleControls"/>
       </span>
       <song-list-controls
-        v-show="sharedState.root && selectedSongs.length && (!isPhone || showingControls)"
+        v-show="displaySongControls"
         @shuffleAll="shuffleAll"
         @shuffleSelected="shuffleSelected"
         :config="songListControlConfig"
@@ -14,7 +14,7 @@
     </h1>
 
     <sound-bar v-if="loading" class="sbcenter"></sound-bar>
-    <div v-else class="folders" :class="'as-' + viewMode" id="foldersContainer">
+    <div v-else class="folders" id="foldersContainer">
       <ul><folder-item :folder="sharedState.root" :level="0"></ul>
 
       <to-top-button :showing="showBackToTop"></to-top-button>
@@ -24,7 +24,7 @@
 
 <script>
 import { filterBy, limitBy, event } from '../../../utils'
-import { folderStore } from '../../../stores'
+import { folderStore, sharedStore } from '../../../stores'
 import folderItem from '../../shared/folder-item.vue'
 import infiniteScroll from '../../../mixins/infinite-scroll'
 import hasSongList from '../../../mixins/has-song-list'
@@ -38,18 +38,19 @@ export default {
     return {  
       q: '', // the filter text, currently ignored
       sharedState: folderStore.state,
-      viewMode: null,
+      songsSelection: sharedStore.state.songsSelection,
       hasSelection: false,
       loading: true
     }
   },
 
-  computed: {},
+  computed: {
+    displaySongControls() {
+      return this.hasSelection && (!this.isPhone || this.showingControls)
+    }
+  },
 
   methods: {
-    changeViewMode(mode) {
-      this.viewMode = mode
-    }
   },
 
   created() {
@@ -62,15 +63,14 @@ export default {
 
       'koel:hierarchyready': () => {
          this.sharedState = folderStore.state
+         this.songsSelection = sharedStore.state.songsSelection
          this.loading = false
       },
 
-      'folder-song:unselect': () => {
-         this.selectedSongs = []
-      },
-
-      'folder-song:select': songs => this.selectedSongs = songs
-    
+      'folder:selection': () => {
+         this.hasSelection = this.songsSelection.length > 0
+         if (this.hasSelection) this.setSelectedSongs(this.songsSelection)
+      }
     })
   }
 }

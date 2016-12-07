@@ -30,7 +30,7 @@
            <tr is="song-item" v-for="item in subSongs" :song="item" ref="rows" @itemClicked="itemClicked" :key="item.id"></tr>
         </tbody>
       </table>
-      <song-menu ref="contextMenu" :songs="selectedSongs"/>
+      <song-menu ref="contextMenu" :songs="songsSelection"/>
     </ul>
   </li>
 </template>
@@ -64,7 +64,7 @@ export default {
       isOpen: false,
       sharedState: sharedStore.state,
       name: this.folder.name,
-      selectedSongs: []
+      songsSelection: sharedStore.state.songsSelection
     }
   },
 
@@ -103,7 +103,10 @@ export default {
      */
     toggle(e) {
       // Need to close all siblings here first
-      forEach(this.$parent.$children, comp => { if ("isOpen" in comp && comp.isOpen && comp.name !== this.name) comp.isOpen = false })
+      forEach(this.$parent.$children, comp => { 
+        if ("isOpen" in comp && comp.isOpen && comp.name !== this.name)
+          comp.close()
+      })
       this.isOpen = !this.isOpen
       if (this.isOpen) {
         Vue.nextTick(() => {
@@ -119,9 +122,18 @@ export default {
             container.scrollTop(distance + container.scrollTop())
           }
         });
-      }
+      } else 
+        this.close()
     },
 
+    /**
+     * Close the current folder
+     */
+    close() {
+      this.isOpen = false
+      this.songsSelection.length = 0; // Mutate the array
+      event.emit('folder:selection') // This is required because we have recursive component and not a direct parent/child relation      
+    },
 
     /**
      * Play all songs in the current folder in track order,
@@ -179,7 +191,10 @@ export default {
     gatherSelected () {
       const selectedRows = filter(this.$refs.rows, { selected: true })
       const ids = map(selectedRows, row => row.song.id)
-      this.selectedSongs = songStore.byIds(ids)
+      this.songsSelection.length = 0;
+      Array.prototype.push.apply(this.songsSelection, songStore.byIds(ids)) // We need to keep the reference valid
+      event.emit('folder:selection')
+      return this.songsSelection
     },
 
     /**
@@ -235,7 +250,6 @@ export default {
     clearSelection () {
       invokeMap(this.$refs.rows, 'deselect')
       this.gatherSelected()
-      this.$emit('folder-song:unselect');
     },
 
     /**

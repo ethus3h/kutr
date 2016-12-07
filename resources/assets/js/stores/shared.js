@@ -15,6 +15,7 @@ export const sharedStore = {
     interactions: [],
     users: [],
     settings: [],
+    songsSelection: [],
     currentUser: null,
     playlists: [],
     useLastfm: false,
@@ -71,6 +72,7 @@ export const sharedStore = {
     this.state.interactions = []
     this.state.users = []
     this.state.settings = []
+    this.state.songsSelection = []
     this.state.currentUser = null
     this.state.playlists = []
     this.state.useLastfm = false
